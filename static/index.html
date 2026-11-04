@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assistante Ventes</title>
+<style>
+:root{--bg:#f6f5f2;--carte:#ffffff;--encre:#262b2e;--doux:#6d7478;
+      --ligne:#dcd9d2;--accent:#1d6f8a;--accent-doux:#e3eff3;}
+body{margin:0;background:var(--bg);color:var(--encre);
+     font:15px/1.55 "Segoe UI",system-ui,sans-serif;
+     padding:28px max(16px,calc(50vw - 420px));}
+h1{font-size:22px;margin:0 0 2px;}
+.sous{color:var(--doux);font-size:13px;margin:0 0 20px;}
+nav{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+nav button{border:1px solid var(--ligne);background:var(--carte);
+           padding:8px 14px;border-radius:6px;font-size:14px;cursor:pointer;}
+nav button.actif{background:var(--accent);border-color:var(--accent);color:#fff;}
+section{background:var(--carte);border:1px solid var(--ligne);
+        border-radius:8px;padding:18px;display:none;}
+section.actif{display:block;}
+label{display:block;font-weight:600;font-size:13px;margin:10px 0 4px;}
+textarea,input,select{width:100%;box-sizing:border-box;border:1px solid var(--ligne);
+      border-radius:6px;padding:9px;font:inherit;background:var(--bg);}
+textarea{min-height:110px;resize:vertical;}
+.action{margin-top:12px;background:var(--accent);color:#fff;border:none;
+        padding:10px 18px;border-radius:6px;font-size:14px;cursor:pointer;}
+.action[disabled]{opacity:.6;cursor:wait;}
+.resultat{white-space:pre-wrap;background:var(--accent-doux);border-radius:6px;
+          padding:12px;margin-top:14px;font-size:14px;min-height:20px;}
+.resultat.erreur{background:#f7e8e4;}
+table{border-collapse:collapse;width:100%;margin-top:14px;font-size:13.5px;}
+td{border-bottom:1px solid var(--ligne);padding:6px 8px;}
+td:first-child{color:var(--doux);width:40%;}
+.pied{color:var(--doux);font-size:12px;margin-top:18px;}
+</style>
+</head>
+<body>
+<h1>Assistante Ventes</h1>
+<p class="sous">Tout reste sur cet ordinateur. Aucun service externe.</p>
+
+<nav>
+  <button data-cible="traduire" class="actif">Traduire un message</button>
+  <button data-cible="rediger">Rédiger un e-mail</button>
+  <button data-cible="commande">Chercher une commande</button>
+</nav>
+
+<section id="traduire" class="actif">
+  <label for="texte-source">Message du client (toute langue)</label>
+  <textarea id="texte-source" placeholder="Collez ici le message reçu…"></textarea>
+  <button class="action" id="btn-traduire">Traduire en français</button>
+  <div class="resultat" id="res-traduire"></div>
+</section>
+
+<section id="rediger">
+  <label for="consigne">Ce que l'e-mail doit dire</label>
+  <textarea id="consigne" placeholder="Ex. : relancer poliment le client pour la facture CMD-2026-1015, échéance dépassée de 12 jours…"></textarea>
+  <label for="langue">Langue de l'e-mail</label>
+  <select id="langue">
+    <option value="en français">Français</option>
+    <option value="en anglais">Anglais</option>
+    <option value="dans la langue du message d'origine">Langue du client</option>
+  </select>
+  <button class="action" id="btn-rediger">Rédiger</button>
+  <div class="resultat" id="res-rediger"></div>
+</section>
+
+<section id="commande">
+  <label for="numero">Numéro de commande</label>
+  <input id="numero" placeholder="Ex. : CMD-2026-1004">
+  <button class="action" id="btn-commande">Chercher</button>
+  <div class="resultat" id="res-commande"></div>
+  <table id="tbl-commande" hidden></table>
+</section>
+
+<p class="pied">La recherche de commandes lit directement le fichier Excel/CSV,
+sans intelligence artificielle. Le modèle local ne sert qu'à traduire et rédiger,
+et un brouillon se relit toujours avant envoi.</p>
+
+<script>
+const ongle = (id) => document.getElementById(id);
+document.querySelectorAll("nav button").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll("nav button").forEach(x => x.classList.remove("actif"));
+  document.querySelectorAll("section").forEach(x => x.classList.remove("actif"));
+  b.classList.add("actif");
+  ongle(b.dataset.cible).classList.add("actif");
+}));
+
+async function poster(url, corps, bouton, zone) {
+  bouton.disabled = true;
+  zone.classList.remove("erreur");
+  zone.textContent = "Un instant… (le modèle local réfléchit)";
+  try {
+    const r = await fetch(url, {method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(corps)});
+    const d = await r.json();
+    if (!d.ok) zone.classList.add("erreur");
+    return d;
+  } catch (e) {
+    zone.classList.add("erreur");
+    return {ok: false, texte: "L'application locale ne répond pas : " + e};
+  } finally {
+    bouton.disabled = false;
+  }
+}
+
+ongle("btn-traduire").addEventListener("click", async () => {
+  const zone = ongle("res-traduire");
+  const d = await poster("/api/traduire",
+    {texte: ongle("texte-source").value}, ongle("btn-traduire"), zone);
+  zone.textContent = d.texte;
+});
+
+ongle("btn-rediger").addEventListener("click", async () => {
+  const zone = ongle("res-rediger");
+  const d = await poster("/api/rediger",
+    {consigne: ongle("consigne").value, langue: ongle("langue").value},
+    ongle("btn-rediger"), zone);
+  zone.textContent = d.texte;
+});
+
+ongle("btn-commande").addEventListener("click", async () => {
+  const zone = ongle("res-commande");
+  const tbl = ongle("tbl-commande");
+  tbl.hidden = true; tbl.innerHTML = "";
+  const d = await poster("/api/commande",
+    {numero: ongle("numero").value}, ongle("btn-commande"), zone);
+  if (!d.ok) { zone.textContent = d.texte; return; }
+  zone.textContent = "Commande trouvée :";
+  const noms = {order_id: "Commande", order_date: "Date", client_id: "Client",
+    product_id: "Référence", qty: "Quantité", unit_price_eur: "Prix unitaire (EUR)",
+    tax_rate_pct: "TVA (%)", total_eur: "Total (EUR)", status: "Statut",
+    payment_due: "Échéance de paiement"};
+  for (const [cle, val] of Object.entries(d.commande)) {
+    const tr = document.createElement("tr");
+    const td1 = document.createElement("td"); td1.textContent = noms[cle] || cle;
+    const td2 = document.createElement("td"); td2.textContent = val;
+    tr.append(td1, td2); tbl.append(tr);
+  }
+  tbl.hidden = false;
+});
+</script>
+</body>
+</html>
