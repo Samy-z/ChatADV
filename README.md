@@ -1,9 +1,11 @@
 # ChatADV
 
-ChatADV (Chat de l'Assistante Des Ventes) : petite application locale pour traduire les
-messages clients, rédiger les e-mails récurrents (relances de paiement,
-réponses aux demandes de remise, livraisons incomplètes), et retrouver une
-commande dans le fichier de suivi.
+Assistant léger pour le travail de bureau, conçu pour tourner sur un
+processeur seul (aucune carte graphique requise) : traduire des messages,
+rédiger des e-mails récurrents (relances de paiement, réponses aux demandes
+de remise, livraisons incomplètes), et retrouver une commande dans un
+fichier de suivi. Le modèle embarqué est choisi en comparant plusieurs
+modèles open-weight sur ces tâches précises.
 
 **Tout reste sur l'ordinateur.** Aucun service externe, aucun compte, aucune
 télémétrie. Le modèle de langue tourne en local via Ollama, en mode
