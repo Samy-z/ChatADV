@@ -1,6 +1,6 @@
-# Assistante Ventes
+# ChatADV
 
-Petite application locale pour une assistante des ventes : traduire les
+ChatADV (Chat de l'Assistante Des Ventes) : petite application locale pour traduire les
 messages clients, rédiger les e-mails récurrents (relances de paiement,
 réponses aux demandes de remise, livraisons incomplètes), et retrouver une
 commande dans le fichier de suivi.

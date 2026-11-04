@@ -1,4 +1,4 @@
-"""Assistante Ventes — petite application locale, page web sur la machine.
+"""ChatADV — petite application locale, page web sur la machine.
 
 Tout reste sur le PC: aucun service externe, aucun compte, aucune télémétrie.
 Le modèle de langue tourne via Ollama en local (http://localhost:11434) et
@@ -117,7 +117,7 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    print(f"Assistante Ventes — http://localhost:{PORT}")
+    print(f"ChatADV — http://localhost:{PORT}")
     print(f"Modèle (provisoire): {MODELE} via {OLLAMA}")
     print(f"Fichier commandes: {FICHIER_COMMANDES}")
     ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()
