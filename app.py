@@ -24,7 +24,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 PORT = 8742
 OLLAMA = os.environ.get("ASSISTANTE_OLLAMA", "http://localhost:11434")
-MODELE = os.environ.get("ASSISTANTE_MODELE", "qwen3.5:4b")  # provisoire
+MODELE = os.environ.get("ASSISTANTE_MODELE", "llama3.2:3b")  # provisoire
 FICHIER_COMMANDES = Path(os.environ.get("ASSISTANTE_COMMANDES",
                                         HERE / "data" / "exemple-commandes.csv"))
 
@@ -50,7 +50,14 @@ def appeler_ollama(prompt: str) -> tuple[bool, str]:
                                  headers={"Content-Type": "application/json"})
     try:
         with urllib.request.urlopen(req, timeout=180) as r:
-            return True, json.loads(r.read().decode())["response"].strip()
+            texte = json.loads(r.read().decode())["response"].strip()
+        if not texte:
+            # Les modèles "à raisonnement" peuvent consommer tout leur budget
+            # sans produire de réponse visible par cette API.
+            return False, (f"Le modèle « {MODELE} » a répondu vide. Ce modèle "
+                           "n'est probablement pas adapté ici : choisissez-en "
+                           "un autre via ASSISTANTE_MODELE.")
+        return True, texte
     except Exception as e:  # noqa: BLE001
         return False, ("Le modèle local ne répond pas. Vérifiez qu'Ollama "
                        f"est démarré, puis réessayez. Détail: {e}")

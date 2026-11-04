@@ -16,8 +16,8 @@ passer par un modèle.
 ## Lancer
 
 1. Installer [Ollama](https://ollama.com) puis, une fois :
-   `ollama pull qwen3.5:4b` (modèle provisoire — la campagne de comparaison
-   en cours désignera le définitif).
+   `ollama pull llama3.2:3b` (modèle provisoire — la campagne de comparaison
+   en cours désignera le définitif). *Built with Llama.*
 2. `python app.py`
 3. Ouvrir http://localhost:8742
 
