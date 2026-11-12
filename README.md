@@ -16,8 +16,8 @@ passer par un modèle.
 ## Lancer
 
 1. Installer [Ollama](https://ollama.com) puis, une fois :
-   `ollama pull llama3.2:3b` (modèle provisoire — la campagne de comparaison
-   en cours désignera le définitif). *Built with Llama.*
+   `ollama pull phi4-mini` (licence MIT; modèle désigné par la campagne de
+   comparaison, voir État).
 2. `python app.py`
 3. Ouvrir http://localhost:8742
 
@@ -28,7 +28,15 @@ Excel .xlsx à venir), `ASSISTANTE_OLLAMA` (adresse du serveur local).
 ## État
 
 Squelette fonctionnel (2026-11-04) : trois onglets opérationnels contre un
-Ollama local, données d'exemple synthétiques incluses. À venir : lecture
-.xlsx native, remplissage de contrats, choix du modèle issu de la campagne
-a-prime (`docs/compare/campaign-assistante.md` du dépôt a-prime), et un
-lanceur sans terminal.
+Ollama local, données d'exemple synthétiques incluses.
+
+Modèle définitif choisi (2026-11-12) : **phi4-mini**, désigné par la
+campagne de comparaison a-prime (`docs/compare/campaign-assistante.md` du
+dépôt a-prime). Le détecteur a certifié les 18 entrées sur 40 où les deux
+finalistes divergent, puis un jugement humain à l'aveugle a tranché
+(8 contre 6, les traductions 3 contre 1). L'application sert le régime
+exact qui a été mesuré : température 0.2, budget de 400 jetons,
+processeur seul.
+
+À venir : lecture .xlsx native, remplissage de contrats, règles maison
+dans la consigne de rédaction, et un lanceur sans terminal.

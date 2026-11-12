@@ -8,8 +8,9 @@ d'un tableau n'a pas à passer par une IA.
 
     python app.py            puis ouvrir http://localhost:8742
 
-Le modèle par défaut est provisoire; la campagne de comparaison
-(a-prime, docs/compare/campaign-assistante.md) désignera le gagnant.
+Le modèle par défaut, phi4-mini (licence MIT), a été désigné par la
+campagne de comparaison a-prime (docs/compare/campaign-assistante.md) :
+flagué par le détecteur sur 18 entrées de 40, puis jugé à l'aveugle.
 """
 
 from __future__ import annotations
@@ -24,7 +25,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 PORT = 8742
 OLLAMA = os.environ.get("ASSISTANTE_OLLAMA", "http://localhost:11434")
-MODELE = os.environ.get("ASSISTANTE_MODELE", "llama3.2:3b")  # provisoire
+MODELE = os.environ.get("ASSISTANTE_MODELE", "phi4-mini")  # choisi 2026-11
 FICHIER_COMMANDES = Path(os.environ.get("ASSISTANTE_COMMANDES",
                                         HERE / "data" / "exemple-commandes.csv"))
 
@@ -43,8 +44,12 @@ PROMPT_REDIGER = (
 
 def appeler_ollama(prompt: str) -> tuple[bool, str]:
     """(ok, texte). Jamais d'exception vers l'interface: un message clair."""
+    # Le régime exact mesuré par la campagne: température 0.2, budget de
+    # 400 jetons, processeur seul. S'en écarter, c'est servir un modèle
+    # qui n'a pas été testé tel quel.
     corps = json.dumps({"model": MODELE, "prompt": prompt, "stream": False,
-                        "options": {"temperature": 0.2, "num_gpu": 0}})
+                        "options": {"temperature": 0.2, "num_predict": 400,
+                                    "num_gpu": 0}})
     req = urllib.request.Request(OLLAMA + "/api/generate",
                                  data=corps.encode("utf-8"),
                                  headers={"Content-Type": "application/json"})
@@ -125,6 +130,6 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     print(f"ChatADV — http://localhost:{PORT}")
-    print(f"Modèle (provisoire): {MODELE} via {OLLAMA}")
+    print(f"Modèle: {MODELE} via {OLLAMA}")
     print(f"Fichier commandes: {FICHIER_COMMANDES}")
     ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()
